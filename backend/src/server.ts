@@ -97,9 +97,10 @@ app.get('/api/health', (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   logger.info(`🚀 Server running on port ${PORT}`);
   logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.info(`🔒 Security headers enabled`);
   logger.info(`🌐 CORS configured for: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
+  logger.info(`🌍 Server accessible from: http://0.0.0.0:${PORT}`);
 });

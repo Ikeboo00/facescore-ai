@@ -76,14 +76,14 @@ function App() {
           )}
 
           {/* Current Image Preview */}
-          {state.currentImage && !state.isAnalyzing && (
+          {currentImage && !isAnalyzing && !isUploading && (
             <div className="card p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
                 分析対象画像
               </h3>
               <div className="flex justify-center">
                 <img 
-                  src={state.currentImage} 
+                  src={currentImage} 
                   alt="分析対象"
                   className="max-w-md w-full h-auto rounded-lg shadow-lg"
                 />

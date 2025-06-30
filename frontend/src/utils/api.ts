@@ -55,6 +55,7 @@ export const uploadImage = async (file: File): Promise<UploadResponse> => {
 
 export const analyzeImage = async (request: { imageId: string }): Promise<FaceAnalysisResult> => {
   // 簡易的な実装 - 実際のAPIを呼び出す代わりにモックデータを返す
+  console.log('Analyzing image with ID:', request.imageId);
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({

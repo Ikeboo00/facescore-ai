@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Analysis {
+  id              String   @id @default(cuid())
+  imageHash       String?  // 画像のハッシュ値（重複防止）
+  overallScore    Float
+  symmetryScore   Float
+  eyeRatioScore   Float
+  noseRatioScore  Float
+  jawlineScore    Float
+  skinScore       Float
+  advice          String?
+  createdAt       DateTime @default(now())
+  
+  @@map("analyses")
+}

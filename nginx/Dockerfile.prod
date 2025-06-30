@@ -1,0 +1,31 @@
+FROM nginx:alpine
+
+# 必要なパッケージをインストール
+RUN apk add --no-cache \
+    bash \
+    curl \
+    envsubst
+
+# 設定ファイルをコピー
+COPY nginx.prod.conf /etc/nginx/nginx.conf.template
+
+# SSL証明書用ディレクトリを作成
+RUN mkdir -p /var/www/certbot
+
+# 起動スクリプトを作成
+RUN cat > /docker-entrypoint.sh << 'EOF'
+#!/bin/bash
+set -e
+
+# 環境変数を設定ファイルに適用
+envsubst '${DOMAIN}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+
+# Nginxを起動
+exec nginx -g "daemon off;"
+EOF
+
+RUN chmod +x /docker-entrypoint.sh
+
+EXPOSE 80 443
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

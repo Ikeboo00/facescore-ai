@@ -1,0 +1,30 @@
+[build]
+  base = "frontend"
+  command = "npm run build:prod"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.production.environment]
+  VITE_API_URL = "https://facescore-backend.onrender.com"
+  VITE_APP_TITLE = "FaceScore AI"
+  VITE_MAX_FILE_SIZE = "10485760"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://facescore-backend.onrender.com"
+  VITE_APP_TITLE = "FaceScore AI (Preview)"
+  VITE_MAX_FILE_SIZE = "10485760"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"

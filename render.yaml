@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: facescore-backend
+    env: node
+    buildCommand: cd backend && npm install && npm run build && npx prisma generate
+    startCommand: cd backend && npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+    healthCheckPath: /api/health
+    
+  - type: pserv
+    name: facescore-postgres
+    env: docker
+    dockerfilePath: ./postgres.dockerfile
+    databases:
+      - name: facescore_db
+        user: facescore_user

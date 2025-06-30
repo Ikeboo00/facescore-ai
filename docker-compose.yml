@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # PostgreSQLデータベース
+  postgres:
+    image: postgres:15-alpine
+    container_name: facescore-postgres
+    environment:
+      POSTGRES_DB: facescore_db
+      POSTGRES_USER: facescore_user
+      POSTGRES_PASSWORD: FaceScore2024!SecureDB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # バックエンドAPI
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: facescore-backend
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://facescore_user:your_secure_password_here@postgres:5432/facescore_db?schema=public
+    env_file:
+      - ./backend/.env.production
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/logs:/app/logs
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # フロントエンド
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: facescore-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Nginx リバースプロキシ（オプション）
+  nginx:
+    image: nginx:alpine
+    container_name: facescore-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    ports:
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

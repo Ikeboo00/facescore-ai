@@ -7,17 +7,23 @@
   NODE_VERSION = "20"
 
 [[redirects]]
+  from = "/api/*"
+  to = "http://113.153.91.53:3001/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
 [context.production.environment]
-  VITE_API_URL = "https://facescore-backend.onrender.com"
+  VITE_API_URL = ""
   VITE_APP_TITLE = "FaceScore AI"
   VITE_MAX_FILE_SIZE = "10485760"
 
 [context.deploy-preview.environment]
-  VITE_API_URL = "https://facescore-backend.onrender.com"
+  VITE_API_URL = "http://113.153.91.53:3001"
   VITE_APP_TITLE = "FaceScore AI (Preview)"
   VITE_MAX_FILE_SIZE = "10485760"
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import ImageUpload from './components/ImageUpload';
 import ScoreDisplay from './components/ScoreDisplay';
 import AdviceCard from './components/AdviceCard';

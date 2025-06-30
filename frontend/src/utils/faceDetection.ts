@@ -51,7 +51,7 @@ export function drawDetections(
 
     const landmarks = detection.landmarks;
     ctx.fillStyle = '#ff0000';
-    landmarks.positions.forEach(point => {
+    landmarks.positions.forEach((point: any) => {
       ctx.beginPath();
       ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
       ctx.fill();

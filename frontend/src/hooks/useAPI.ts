@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { uploadImage, analyzeImage } from '../utils/api';
-import { FaceAnalysisResult } from '../types';
+import type { FaceAnalysisResult } from '../types';
 
 export const useImageAnalysis = () => {
   const [isUploading, setIsUploading] = useState(false);

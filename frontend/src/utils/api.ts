@@ -28,9 +28,6 @@ interface FaceAnalysisResult {
   createdAt: string;
 }
 
-interface AnalyzeRequest {
-  imageId: string;
-}
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -56,7 +53,7 @@ export const uploadImage = async (file: File): Promise<UploadResponse> => {
   return response.data.data!;
 };
 
-export const analyzeImage = async (file: File): Promise<FaceAnalysisResult> => {
+export const analyzeImage = async (request: { imageId: string }): Promise<FaceAnalysisResult> => {
   // 簡易的な実装 - 実際のAPIを呼び出す代わりにモックデータを返す
   return new Promise((resolve) => {
     setTimeout(() => {

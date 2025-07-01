@@ -2,15 +2,25 @@
   base = "frontend"
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20"
 
 [[redirects]]
-  from = "/api/*"
-  to = "https://facescore-backend.onrender.com/api/:splat"
+  from = "/api/upload"
+  to = "/.netlify/functions/upload"
   status = 200
-  force = true
+
+[[redirects]]
+  from = "/api/analyze"
+  to = "/.netlify/functions/analyze"
+  status = 200
+
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
 
 [[redirects]]
   from = "/*"
@@ -18,7 +28,7 @@
   status = 200
 
 [context.production.environment]
-  VITE_API_URL = "https://facescore-backend.onrender.com"
+  VITE_API_URL = ""
   VITE_APP_TITLE = "FaceScore AI"
   VITE_MAX_FILE_SIZE = "10485760"
 

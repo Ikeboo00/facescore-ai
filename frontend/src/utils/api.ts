@@ -95,7 +95,7 @@ const compressImage = (file: File, maxSizeMB: number = 2): Promise<File> => {
   });
 };
 
-// リトライ付きアップロード関数
+// リトライ付きアップロード関数（FormData用）
 const uploadWithRetry = async (
   formData: FormData, 
   maxRetries: number = 3,
@@ -133,6 +133,54 @@ const uploadWithRetry = async (
   throw lastError!;
 };
 
+// リトライ付きJSONアップロード関数
+const uploadWithRetryJSON = async (
+  data: any, 
+  maxRetries: number = 3,
+  onProgress?: (progress: number) => void
+): Promise<any> => {
+  let lastError: Error;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await api.post<APIResponse<UploadResponse>>('/upload', data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            onProgress(progress);
+          }
+        },
+      });
+      
+      return response;
+    } catch (error: any) {
+      lastError = error;
+      console.warn(`アップロード試行 ${attempt}/${maxRetries} 失敗:`, error.message);
+      
+      // 最後の試行でない場合は待機
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt) * 1000; // 指数バックオフ
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError!;
+};
+
+// ファイルをBase64データURLに変換する関数
+const fileToDataURL = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 export const uploadImage = async (
   file: File,
   onProgress?: (progress: number) => void
@@ -147,13 +195,22 @@ export const uploadImage = async (
       console.log(`圧縮完了: ${file.size}B → ${processedFile.size}B`);
     }
     
-    const formData = new FormData();
-    formData.append('image', processedFile);
+    // ファイルをBase64データURLに変換
+    onProgress?.(20);
+    const dataUrl = await fileToDataURL(processedFile);
     
-    const response = await uploadWithRetry(formData, 3, (progress) => {
-      // 圧縮が完了している場合は10%から開始
+    // JSONデータとして送信
+    const requestData = {
+      image: dataUrl,
+      filename: processedFile.name,
+      fileType: processedFile.type,
+      fileSize: processedFile.size
+    };
+    
+    const response = await uploadWithRetryJSON(requestData, 3, (progress) => {
+      // 圧縮が完了している場合は20%から開始
       const adjustedProgress = file.size > 2 * 1024 * 1024 ? 
-        10 + (progress * 0.9) : progress;
+        20 + (progress * 0.8) : progress;
       onProgress?.(adjustedProgress);
     });
     

@@ -1,4 +1,3 @@
-const multipart = require('lambda-multipart-parser');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 
@@ -10,8 +9,27 @@ const setCorsHeaders = () => ({
   'Content-Type': 'application/json',
 });
 
+// データURLからバッファを抽出する関数
+const dataURLToBuffer = (dataUrl) => {
+  try {
+    const matches = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+    if (!matches) {
+      throw new Error('Invalid data URL format');
+    }
+    
+    const mimeType = matches[1];
+    const base64Data = matches[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    return { buffer, mimeType };
+  } catch (error) {
+    throw new Error('Failed to parse data URL');
+  }
+};
+
 exports.handler = async (event, context) => {
   console.log('Upload function called:', event.httpMethod);
+  console.log('Headers:', event.headers);
 
   // プリフライトリクエストの処理
   if (event.httpMethod === 'OPTIONS') {
@@ -34,27 +52,28 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // multipart/form-data をパース
-    const result = await multipart.parse(event);
-    console.log('Parsed multipart data:', Object.keys(result));
+    // JSONデータをパース
+    const body = JSON.parse(event.body);
+    console.log('Request body keys:', Object.keys(body));
 
-    if (!result.image) {
+    if (!body.image) {
       return {
         statusCode: 400,
         headers: setCorsHeaders(),
         body: JSON.stringify({
           success: false,
-          error: 'No image file provided'
+          error: 'No image data provided'
         }),
       };
     }
 
-    const file = result.image;
-    const buffer = Buffer.from(file.content, 'base64');
+    // データURLからバッファとMIMEタイプを抽出
+    const { buffer, mimeType } = dataURLToBuffer(body.image);
+    console.log('Extracted image:', { mimeType, bufferSize: buffer.length });
 
     // ファイル形式を検証
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.contentType)) {
+    if (!validTypes.includes(mimeType)) {
       return {
         statusCode: 400,
         headers: setCorsHeaders(),
@@ -124,7 +143,9 @@ exports.handler = async (event, context) => {
           imageId: imageId,
           imageUrl: imageUrl, // 本番では実際のURLを返す
           processedSize: processedBuffer.length,
-          originalSize: buffer.length
+          originalSize: buffer.length,
+          filename: body.filename || 'image.jpg',
+          originalFileType: body.fileType || mimeType
         }
       }),
     };
@@ -136,7 +157,7 @@ exports.handler = async (event, context) => {
       headers: setCorsHeaders(),
       body: JSON.stringify({
         success: false,
-        error: 'Internal server error'
+        error: `Internal server error: ${error.message}`
       }),
     };
   }

@@ -8,7 +8,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "http://113.153.91.53:3001/api/:splat"
+  to = "https://public-ears-attack.loca.lt/api/:splat"
   status = 200
   force = true
 

@@ -7,7 +7,7 @@ import './index.css';
 
 function App() {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
-  const { processImage, result, isUploading, isAnalyzing, error } = useImageAnalysis();
+  const { processImage, result, isUploading, isAnalyzing, uploadProgress, error } = useImageAnalysis();
 
   const handleImageSelect = useCallback(async (file: File) => {
     const imageUrl = URL.createObjectURL(file);
@@ -39,6 +39,47 @@ function App() {
             />
           </div>
 
+          {/* Upload Progress */}
+          {isUploading && (
+            <div className="card p-6">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  画像をアップロード中...
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {uploadProgress < 10 ? '画像を圧縮中...' : 'サーバーにアップロード中...'}
+                </p>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                <div 
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+              
+              <div className="text-center text-sm text-gray-600">
+                {uploadProgress}%
+              </div>
+            </div>
+          )}
+
+          {/* Analysis Progress */}
+          {isAnalyzing && (
+            <div className="card p-6">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  画像を解析中...
+                </h3>
+                <p className="text-sm text-gray-600">
+                  AIが顔の特徴を分析しています
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Error Display */}
           {error && (
             <div className="card p-4 bg-red-50 border border-red-200">
@@ -47,6 +88,14 @@ function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span className="text-red-800 font-medium">エラー: {error}</span>
+              </div>
+              <div className="mt-2 text-sm text-red-700">
+                <p>※ スマートフォンをご利用の場合：</p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                  <li>WiFi接続を確認してください</li>
+                  <li>画像サイズが大きすぎる可能性があります</li>
+                  <li>しばらく待ってから再度お試しください</li>
+                </ul>
               </div>
             </div>
           )}

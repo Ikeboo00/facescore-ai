@@ -37,7 +37,7 @@ class MemoryRateLimiter {
   }
 
   middleware() {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction): void => {
       const key = this.getKey(req);
       const now = Date.now();
       
@@ -60,10 +60,11 @@ class MemoryRateLimiter {
       });
 
       if (current.count > this.options.max) {
-        return res.status(429).json({
+        res.status(429).json({
           error: this.options.message,
           retryAfter: Math.ceil((current.resetTime - now) / 1000)
         });
+        return;
       }
 
       next();

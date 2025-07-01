@@ -35,7 +35,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 
 // セキュリティミドルウェア
 app.use(helmet({
@@ -55,13 +55,6 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// レート制限
-const rateLimiter = createRateLimiter({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15分
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // リクエスト上限
-  message: 'リクエストが多すぎます。しばらく時間をおいてから再試行してください。'
-});
-
 // CORS設定
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, origin?: boolean | string | RegExp | (boolean | string | RegExp)[]) => void) => {
@@ -79,8 +72,15 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// レート制限
+const rateLimiter = createRateLimiter({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15分
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // リクエスト上限
+  message: 'リクエストが多すぎます。しばらく時間をおいてから再試行してください。'
+});
+
 // レート制限を適用
-app.use(rateLimiter.middleware());
+app.use('/api', rateLimiter.middleware());
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

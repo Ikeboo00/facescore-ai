@@ -5,6 +5,7 @@ import type { FaceAnalysisResult } from '../types';
 export const useImageAnalysis = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [result, setResult] = useState<FaceAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,10 +13,14 @@ export const useImageAnalysis = () => {
     try {
       setError(null);
       setResult(null);
+      setUploadProgress(0);
       
       setIsUploading(true);
-      const uploadResult = await uploadImage(file);
+      const uploadResult = await uploadImage(file, (progress) => {
+        setUploadProgress(progress);
+      });
       setIsUploading(false);
+      setUploadProgress(100);
 
       setIsAnalyzing(true);
       const analysisResult = await analyzeImage({ imageId: uploadResult.imageId });
@@ -25,6 +30,7 @@ export const useImageAnalysis = () => {
     } catch (err) {
       setIsUploading(false);
       setIsAnalyzing(false);
+      setUploadProgress(0);
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   };
@@ -34,6 +40,7 @@ export const useImageAnalysis = () => {
     setError(null);
     setIsUploading(false);
     setIsAnalyzing(false);
+    setUploadProgress(0);
   };
 
   return {
@@ -41,6 +48,7 @@ export const useImageAnalysis = () => {
     reset,
     isUploading,
     isAnalyzing,
+    uploadProgress,
     isProcessing: isUploading || isAnalyzing,
     result,
     error
